@@ -24,6 +24,7 @@ Or install it yourself as:
 - [`GRPC::Kit::Logger`](#grpckitlogger)
 - [`GRPC::Kit::Queue::Publisher`](#grpckitqueuepublisher)
 - [`GRPC::Kit::Queue::Worker`](#grpckitqueueworker)
+- [`GRPC::Kit::Server`](#grpckitserver)
 
 ### GRPC::Kit::Communication::Resilient
 
@@ -83,6 +84,14 @@ And you can use:
 grpc-kit workers list
 # to run a worker
 grpc-kit workers runner MyWorker topic_name
+```
+
+### GRPC::Kit::Server
+
+You can use your generated (based in ours proto's) `server class` and create a `server.rb` (or other name) with:
+
+```ruby
+GRPC::Kit::Server.run(ServerClass)
 ```
 
 ## Development
