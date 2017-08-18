@@ -5,20 +5,20 @@ module GRPC
   module Kit
     module Communication
       module Resilient
-        ERRORS = [
+        DEFAULT_RESCUED_ERRORS = [
           GRPC::BadStatus,
           Google::Cloud::UnavailableError,
           Google::Cloud::InternalError
         ].freeze
 
-        def resilient(limit: 16)
+        def resilient(limit: 16, also_rescue: [])
           tries ||= 0
           yield
         # From Datastore documentation:
         # - UNAVAILABLE;
         # - Server returned an error;
         # - Retry using exponential backoff.
-        rescue *ERRORS => e
+        rescue *(DEFAULT_RESCUED_ERRORS | Array(also_rescue))
           tries += 1
           exponential_backoff(tries, limit: limit) && retry
           raise
