@@ -18,9 +18,7 @@ module GRPC
               GRPC.logger.error("class #{@worker_class} does not exist")
               exit
             end
-
-            subscriber = subscription.listen { |msg| worker.new(msg).call }
-            subscriber.start
+            subscription.listen { |msg| worker.new(msg).call }
           end
 
           private
