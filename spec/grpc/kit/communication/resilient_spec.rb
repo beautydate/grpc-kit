@@ -8,12 +8,16 @@ RSpec.describe GRPC::Kit::Communication::Resilient do
       def raise_error(error, limit = 16)
         resilient(limit: limit) { raise error }
       end
+
+      def raise_custom_error(custom_error, limit = 16)
+        resilient(limit: limit, also_rescue: custom_error.class) { raise custom_error }
+      end
     end
 
     TestResilientCommunication.new
   end
 
-  it 'retry until limit and raise exception after limit' do
+  it 'retries until limit and raise exception after limit' do
     expect(subject).
       to receive(:exponential_backoff)
            .exactly(5).times
@@ -25,7 +29,7 @@ RSpec.describe GRPC::Kit::Communication::Resilient do
   end
 
   describe 'configured errors' do
-    it 'retry for GRPC::BadStatus' do
+    it 'retries for GRPC::BadStatus' do
       expect(subject).
         to receive(:exponential_backoff)
              .exactly(5).times
@@ -36,7 +40,7 @@ RSpec.describe GRPC::Kit::Communication::Resilient do
       }.to raise_error(GRPC::BadStatus)
     end
 
-    it 'retry for Google::Cloud::UnavailableError' do
+    it 'retries for Google::Cloud::UnavailableError' do
       expect(subject).
         to receive(:exponential_backoff)
              .exactly(5).times
@@ -47,15 +51,15 @@ RSpec.describe GRPC::Kit::Communication::Resilient do
       }.to raise_error(Google::Cloud::UnavailableError)
     end
 
-    it 'retry for Google::Cloud::InternalError' do
+    it 'retries for custom errors' do
+      CustomError = Class.new(StandardError)
       expect(subject).
         to receive(:exponential_backoff)
-             .exactly(5).times
-             .and_call_original
-
+          .exactly(5).times
+          .and_call_original
       expect {
-        subject.raise_error(Google::Cloud::InternalError.new, 5)
-      }.to raise_error(Google::Cloud::InternalError)
+        subject.raise_custom_error(CustomError.new, 5)
+      }.to raise_error(CustomError)
     end
   end
 
