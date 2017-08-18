@@ -51,6 +51,16 @@ RSpec.describe GRPC::Kit::Communication::Resilient do
       }.to raise_error(Google::Cloud::UnavailableError)
     end
 
+    it 'retries for Google::Cloud::InternalError' do
+      expect(subject).
+        to receive(:exponential_backoff)
+             .exactly(5).times
+             .and_call_original
+      expect {
+        subject.raise_error(Google::Cloud::InternalError.new, 5)
+      }.to raise_error(Google::Cloud::InternalError)
+    end
+
     it 'retries for custom errors' do
       CustomError = Class.new(StandardError)
       expect(subject).
