@@ -19,9 +19,8 @@ module GRPC
               exit
             end
 
-            subscription.listen do |msg|
-              worker.new(msg).call
-            end
+            subscriber = subscription.listen { |msg| worker.new(msg).call }
+            subscriber.start
           end
 
           private
